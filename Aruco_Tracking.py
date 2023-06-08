@@ -59,7 +59,6 @@ ax1.set_xlabel('Time (s)')
 ax1.set_ylabel('Radians')
 ax1.set_ylim(-4,4)
 
-# fig1.canvas.draw()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Subplot 2 (Z Position) 
 ax2.clear()    #clear plot
