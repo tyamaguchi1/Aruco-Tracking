@@ -95,10 +95,8 @@ args = vars(parser.parse_args())
 ####################
 if args["camera"].lower() == "true":
     #video = cv2.VideoCapture(1 + cv2.CAP_DSHOW)
-    video = cv2.VideoCapture(0)
-    video.set(cv2.CAP_PROP_FPS, 5)
-    video.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)
+    video.set(cv2.CAP_PROP_FPS, 50)
     video.set(cv2.CAP_PROP_GAIN, 14)
     video.set(cv2.CAP_PROP_EXPOSURE, -5)
     width = video.get(3)    # float for width of frame in mm
@@ -182,8 +180,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
             if closest_id is not None:
                 i = np.where(ids == closest_id)[0][0]
                 # Estimate pose of each marker and return rvec and tvec
-                rvec, tvec, rejected = cv2.aruco.estimatePoseSingleMarkers(corners[i], 15.0, matrix_coefficients,
-                                                                           distortion_coefficients)
+                rvec, tvec, rejected = cv2.aruco.estimatePoseSingleMarkers(corners[i], 15.0, matrix_coefficients, distortion_coefficients)
 
                 # Draw a square around the markers
                 cv2.aruco.drawDetectedMarkers(frame, corners)
@@ -259,7 +256,7 @@ while True:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     detected_markers = aruco_display(corners, ids, rejected, frame)
-    output = pose(frame, arucoDict, k, d) #BRUH
+    output = pose(frame, arucoDict, k, d) 
     ts.append(xf) 
 
     #Plot 1 
@@ -278,10 +275,8 @@ while True:
     ax2.set_ylim((-10,max(350,maxZ+10)))
     ax2.set_xlim((0,(xf+10)))
 
-    # fig1.canvas.draw()
-    # fig2.canvas.draw()
-    
-    plt.pause(.03)
+    #Call plot    
+    plt.pause(.001)
 
     cv2.imshow('Estimated Pose', output)
     key = cv2.waitKey(1) & 0xFF
