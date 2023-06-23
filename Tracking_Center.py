@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
 
-#Call: python newplotedit.py --type DICT_5X5_100 --camera True --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy
+#Call: python Tracking_Center.py --type DICT_5X5_100 --camera True --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy
 
 ##################
 # Plot functions #
