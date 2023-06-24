@@ -138,7 +138,7 @@ sf = time.time() #current time
 
 
 ##############################################
-# Identify marker closest to center of frame #
+# Identify marker with least tilt #
 ##############################################
 def detect_tilt(corners, ids, matrix_coefficients, distortion_coefficients):
     
