@@ -355,5 +355,5 @@ while True:
 cv2.destroyAllWindows()
 video.release()
 
-fig1.savefig("RPlot-"+dateStr+".png")
-fig2.savefig("ZPlot-"+dateStr+".png")
+#fig1.savefig("RPlot-"+dateStr+".png")
+#fig2.savefig("ZPlot-"+dateStr+".png")
