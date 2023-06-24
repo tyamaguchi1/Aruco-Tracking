@@ -9,3 +9,5 @@ Files
 5. Tracking_Tilt.py - main script: recognizes Aruco markers, identifies the 3 markers with the smallest tilt, tracks the rotation/translation of those 3 IDs, and plots the rotation/translation of those IDs
 6. graphAngles.py - preliminary script to track the rotation vector of the marker and produce a 3x3 rotation matrix
 7. graphRadians.py - preliminary script to track the rotation vector of the marker and produce a 1x3 rotation vector in radians
+8. calibration_matrix.npy - camera calibration output used in calculating translation/rotation
+9. distortion_coefficients.npy - distortion calibration used to reduce effects of edge distortion in video
