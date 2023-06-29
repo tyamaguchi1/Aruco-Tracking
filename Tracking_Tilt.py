@@ -137,8 +137,8 @@ args = vars(parser.parse_args())
 # Video parameters #
 ####################
 if args["camera"].lower() == "true":
-    #video = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  #USB camera
-    video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
+    video = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  #USB camera
+    #video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
     video.set(cv2.CAP_PROP_FPS, 50)
     #video.set(cv2.CAP_PROP_GAIN, 14)
     #video.set(cv2.CAP_PROP_EXPOSURE, -5)

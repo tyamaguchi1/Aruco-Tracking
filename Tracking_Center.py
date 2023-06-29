@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
 
-#Call: python Tracking_x.py --type DICT_5X5_100 --camera True --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy
+#Call: python Tracking_Center.py --type DICT_5X5_100 --camera True --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy
 
 ##################
 # Plot functions #
@@ -138,8 +138,8 @@ args = vars(parser.parse_args())
 # Video parameters #
 ####################
 if args["camera"].lower() == "true":
-    #video = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  #USB camera
-    video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
+    video = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  #USB camera
+    #video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
     video.set(cv2.CAP_PROP_FPS, 50)
     #video.set(cv2.CAP_PROP_GAIN, 14)
     #video.set(cv2.CAP_PROP_EXPOSURE, -5)
@@ -193,7 +193,6 @@ def detect_three_closest_markers(frame, corners, ids):
         # Return IDs of three closest markers if available
         for i in range(min(3, len(sorted_markers))):
             closest_ids.append(ids[sorted_markers[i][0]][0])
-        print(closest_ids)
 
     return closest_ids
 
@@ -246,8 +245,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
                         rvec_adj = abs(rvec[0][0])
 
                         #rvec 3x3 matrix
-                        rvec_mat = cv2.Rodrigues(rvec_adj)
-                        print('rvec_mat1', rvec_mat)
+                        #rvec_mat = cv2.Rodrigues(rvec_adj)
 
                         #Define plot variables
                         if tvec_adj is not None:
@@ -262,7 +260,6 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
 
 
                 if ids is not None:
-                    closest_id = detect_three_closest_markers(frame, corners, ids)
                     if closest_id is not None:
                         i = np.where(ids == closest_id[1])[0][0]
                         # Estimate pose of each marker and return rvec and tvec
@@ -281,8 +278,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
                         rvec_adj = abs(rvec[0][0])
 
                         #rvec 3x3 matrix
-                        rvec_mat = cv2.Rodrigues(rvec_adj)
-                        print('rvec_mat2', rvec_mat)
+                        #rvec_mat = cv2.Rodrigues(rvec_adj)
 
                         #Define plot variables
                         if tvec_adj is not None:
@@ -296,7 +292,6 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
                             newR2 = rvec_adj[2]
 
                 if ids is not None:
-                    closest_id = detect_three_closest_markers(frame, corners, ids)
                     if closest_id is not None:
                         i = np.where(ids == closest_id[2])[0][0]
                         # Estimate pose of each marker and return rvec and tvec
@@ -315,8 +310,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
                         rvec_adj = abs(rvec[0][0])
 
                         #rvec 3x3 matrix
-                        rvec_mat = cv2.Rodrigues(rvec_adj)
-                        print('rvec_mat3', rvec_mat)
+                        #rvec_mat = cv2.Rodrigues(rvec_adj)
 
                         #Define plot variables
                         if tvec_adj is not None:
