@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
 
-#Call: python Tracking_Center.py --type DICT_5X5_100 --camera True --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy
+#Call: python Tracking_x.py --type DICT_5X5_100 --camera True --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy
 
 ##################
 # Plot functions #
@@ -20,9 +20,13 @@ from matplotlib import pyplot as plt
 fig1 = plt.figure()
 ax1 = fig1.add_subplot(1, 1, 1)
 
-#Create figure 2 to plot distance
+#Create figure 2 to plot z-distance
 fig2 = plt.figure()
 ax2 = fig2.add_subplot(1, 1, 1)
+
+#Create figure 3 to plot x-distance
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(1, 1, 1)
 
 #Define date/time for file naming
 dateStr = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
@@ -36,7 +40,7 @@ xf = 0          #set initial elapsed time equal to zero
 ax1.clear()    #clear plot 
 
 #z-component1
-rx1 = []                             
+rx1 = []       #initialize array for angles                        
 newR1 = 0                            
 lineR1, = ax1.plot(ts,rx1, 'r-') 
 
@@ -58,30 +62,56 @@ ax1.set_ylim(-4,4)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Subplot 2 (Z Position) 
-ax2.clear()    #clear plot
+ax2.clear()    
 
 #closest marker
 z_list1 = []     #initialize array for z distances
-newz1 = 0        
-maxz1 = 0        
+newZ1 = 0        
+maxZ1 = 0        
 linez1, = ax2.plot(ts, z_list1, 'r-')
 
 #second marker
 z_list2 = []
-newz2 = 0
-maxz2 = 0
+newZ2 = 0
+maxZ2 = 0
 linez2, = ax2.plot(ts, z_list2, 'b-')
 
 #third marker
 z_list3 = []
-newz3 = 0
-maxz3 = 0
+newZ3 = 0
+maxZ3 = 0
 linez3, = ax2.plot(ts, z_list3, 'g-')
 
 #plot parameters
 ax2.set_title('Z Position vs. Time')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('Z Position (mm)')
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Subplot 3 (X Position)
+ax3.clear()
+
+#closest marker
+x_list1 = []      #initialize array for x distances
+newX1 = 0
+maxX1 = 0
+linex1, = ax3.plot(ts, x_list1, 'r-')
+
+#second marker
+x_list2 = []
+newX2 = 0
+maxX2 = 0
+linex2, = ax3.plot(ts, x_list2, 'b-')
+
+#third marker
+x_list3 = []
+newX3 = 0
+maxX3 = 0
+linex3, = ax3.plot(ts, x_list3, 'g-')
+
+#plot parameters
+ax3.set_title('X Position vs. Time')
+ax3.set_xlabel('Time (s)')
+ax3.set_ylabel('X Position (mm)')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -172,15 +202,21 @@ def detect_three_closest_markers(frame, corners, ids):
 # Calculate translation/rotation vectors for identified marker #
 ################################################################
 def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
-    global newz1
-    global newz2
-    global newz3
+    global newZ1
+    global newZ2
+    global newZ3
+    global newX1
+    global newX2
+    global newX3
     global newR1
     global newR2
     global newR3
-    global maxz1
-    global maxz2
-    global maxz3
+    global maxZ1
+    global maxZ2
+    global maxZ3
+    global maxX1
+    global maxX2
+    global maxX3
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     parameters = cv2.aruco.DetectorParameters()
@@ -215,9 +251,12 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
 
                         #Define plot variables
                         if tvec_adj is not None:
-                            newz1 = tvec_adj[2]
-                            if newz1 > maxz1:
-                                maxz1 = newz1
+                            newZ1 = tvec_adj[2]
+                            if newZ1 > maxZ1:
+                                maxZ1 = newZ1
+                            newX1 = abs(tvec_adj[0])
+                            if newX1 > maxX1:
+                                maxX1 = newX1
                         if rvec_adj is not None:
                             newR1 = rvec_adj[2]
 
@@ -247,9 +286,12 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
 
                         #Define plot variables
                         if tvec_adj is not None:
-                            newz2 = tvec_adj[2]
-                            if newz2 > maxz2:
-                                maxz2 = newz2
+                            newZ2 = tvec_adj[2]
+                            if newZ2 > maxZ2:
+                                maxZ2 = newZ2
+                            newX2 = abs(tvec_adj[0])
+                            if newX2 > maxX2:
+                                maxX2 = newX2
                         if rvec_adj is not None:
                             newR2 = rvec_adj[2]
 
@@ -278,9 +320,12 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
 
                         #Define plot variables
                         if tvec_adj is not None:
-                            newz3 = tvec_adj[2]
-                            if newz3 > maxz3:
-                                maxz3 = newz3
+                            newZ3 = tvec_adj[2]
+                            if newZ3 > maxZ3:
+                                maxZ3 = newZ3
+                            newX3 = abs(tvec_adj[0])
+                            if newX3 > maxX3:
+                                maxX3 = newX3
                         if rvec_adj is not None:
                             newR3 = rvec_adj[2]
 
@@ -331,18 +376,28 @@ while True:
     lineR2.set_data(ts,rx2)
     lineR3.set_data(ts,rx3)
     ax1.set_xlim((0,(xf+10)))
-    
 
     #Plot 2
-    z_list1.append(newz1)
-    z_list2.append(newz2)
-    z_list3.append(newz3) 
+    z_list1.append(newZ1)
+    z_list2.append(newZ2)
+    z_list3.append(newZ3) 
     linez1.set_data(ts,z_list1)
     linez2.set_data(ts,z_list2)
     linez3.set_data(ts,z_list3)
-    MAX = max(maxz1, maxz2, maxz3)
+    MAX = max(maxZ1, maxZ2, maxZ3)
     ax2.set_ylim((-10,max(350,MAX+10)))
     ax2.set_xlim((0,(xf+10)))
+
+    #Plot 3
+    x_list1.append(newX1)
+    x_list2.append(newX2)
+    x_list3.append(newX3)
+    linex1.set_data(ts,x_list1)
+    linex2.set_data(ts,x_list2)
+    linex3.set_data(ts,x_list3)
+    MAX = max(maxX1, maxX2, maxX3)
+    ax3.set_ylim(-200,200)
+    ax3.set_xlim((0,(xf+10)))
 
     #Call plot    
     plt.pause(.001)
@@ -355,5 +410,6 @@ while True:
 cv2.destroyAllWindows()
 video.release()
 
-#fig1.savefig("RPlot-"+dateStr+".png")
-#fig2.savefig("ZPlot-"+dateStr+".png")
+# fig1.savefig("RPlot-"+dateStr+".png")
+# fig2.savefig("ZPlot-"+dateStr+".png")
+# fig3.savefig("XPlot-"+dateStr+".png")
