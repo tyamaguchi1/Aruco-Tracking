@@ -45,7 +45,7 @@ def calibrate(dirpath, square_size, width, height, visualize=False):
         cv2.imshow('img',gray)
         cv2.waitKey(0)
         # Find the chess board corners
-        ret, corners = cv2.findChessboardCorners(gray, (9,6))
+        ret, corners = cv2.findChessboardCorners(gray, (width,height))
         print("ret",ret)
         print("corners",corners)
 
