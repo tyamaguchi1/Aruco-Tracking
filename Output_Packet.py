@@ -13,10 +13,9 @@ import math
 from config import CamArray
 
 #Constants
-CAM_FOV = 54 #In degrees
-CAM_RESOLUTION = 1920
+CAM_FOV =48 #In degrees. Either 48 or 37
 MARKER_NUM = 10
-ARENA_RADIUS = 5 #mm
+ARENA_RADIUS = 30 #mm
 
 #setup
 cameras = [[] for x in range(len(CamArray))]
@@ -33,7 +32,7 @@ arucoDict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT[args["type"]])
 arucoParams = cv2.aruco.DetectorParameters()
 
 for camera in CamArray:
-    video = cv2.VideoCapture(camera[1])# + cv2.CAP_DSHOW)  #USB camera
+    video = cv2.VideoCapture(camera[1] + cv2.CAP_DSHOW)  #USB camera
     #video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
     video.set(cv2.CAP_PROP_FPS, 50)
     #video.set(cv2.CAP_PROP_GAIN, 14)
@@ -60,23 +59,23 @@ def GetSquareCenterFromCorners(corners):
                 center[1] = (corners[x][1]+corners[y][1])/2
     return center
 
-#takes a frame from a camera and returns the center and rotation of the Aruco marker of least tilt
+#takes a frame from a camera and returns the center, rotation, and dimensions of the Aruco marker of least tilt
 def GetInformation(camera):
     global frame
     ret, frame = camera[0].read()   #reads video input, outputs frame
-
     if ret is False:
         return None
-    
+    name = "Camera" + str(camera[0])
+    cv2.imshow(name, frame)
     return pose(frame, arucoDict, camera[1], camera[2])
 
 ################################################################
-# Return [ID, center x offset, rotation]#
+# Return [ID, center x offset, rotation, x frame dimension]#
 ################################################################
 def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
-    Output = [0, 0, 0]
+    Output = [0, 0, 0, 0]
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = frame# cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     parameters = cv2.aruco.DetectorParameters()
     corners, ids, rejected = cv2.aruco.detectMarkers(gray, arucoDict, parameters=parameters)
     #If markers are detected
@@ -88,7 +87,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
             i = np.where(ids == tilt_id[0])[0][0]
             # Estimate pose of each marker and return rvec and tvec
             rvec, tvec, rejected = cv2.aruco.estimatePoseSingleMarkers(corners[i], 15.0, matrix_coefficients, distortion_coefficients)
-
+#! 15.0
             center = GetSquareCenterFromCorners(corners[i])
             # rvec is rotation of marker - units: rad
             rvec_adj = rvec[0][0]#abs(rvec[0][0])
@@ -121,7 +120,7 @@ def detect_tilt(corners, ids, matrix_coefficients, distortion_coefficients):
     if ids is not None and len(ids) > 0:
         for i, id in enumerate(ids):
             if id is not None:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                gray = frame#cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 parameters = cv2.aruco.DetectorParameters()
                 corners, ids, rejected = cv2.aruco.detectMarkers(gray, arucoDict, parameters=parameters)
                 rvec, tvec, rejected = cv2.aruco.estimatePoseSingleMarkers(corners, 15.0, matrix_coefficients, distortion_coefficients)
@@ -151,17 +150,18 @@ def GetRelativeVector(output, camera_id):
         id-=MARKER_NUM
     vector[2] = id*AngleBetweenMarkers
 
-    vector[3] = math.sin(output[2])*ARENA_RADIUS
+    #vector[3] = math.sin(output[2])*ARENA_RADIUS
     
-    dist = output[1]-(CAM_RESOLUTION/2)
-    vector[1] = (dist/CAM_RESOLUTION)*(CAM_FOV*math.pi/180)
+    width = cameras[camera_id][0].get(3)
 
+    dist = output[1]-(width/2)
+    vector[1] = -(dist/width)*(CAM_FOV*math.pi/180)
+    #print(vector[1])
     return vector
 
 #Calculates the physical vector for the maze from the relative vector data - returns the matrix [[x-off, y-off],[x-slope, y-slope]]
 def GetAbsoluteVector(vector):
     outputMatrix = [[0.0,0.0],[0.0,0.0]]
-    
     CamX, CamY, CamRot = 0,0,0
     for camera in CamArray:
         if camera[0] == vector[0]:
@@ -175,8 +175,9 @@ def GetAbsoluteVector(vector):
     yProp = math.cos(CamRot)
     outputMatrix[0][0] = CamX+(xProp*vector[3])
     outputMatrix[0][1] = CamY+(yProp*vector[3])
-
-    TotalAngle = vector[1]+CamRot
+#    print("Cam Angle:",CamRot)
+#    print("Maze Angle:",vector[1])
+    TotalAngle = -(math.pi-(vector[1]+CamRot))
     outputMatrix[1][0] = math.cos(TotalAngle)
     outputMatrix[1][1] = math.sin(TotalAngle)
 
@@ -210,6 +211,7 @@ while True:
     for x in range(len(cameras)):
         output = GetInformation(cameras[x])
         if output is not None:
+#            print("output:",output)
             Counted+=1
             RelativeVector = GetRelativeVector(output, x)
             for camera in CamArray:
@@ -217,12 +219,12 @@ while True:
                     Rot = camera[2]-RelativeVector[2]
                     if(Rot < 0):
                         Rot+=math.pi*2
-                    if(Rot > 360):
+                    if(Rot > 2*math.pi):
                         Rot -= math.pi*2
                     AvgRot+= Rot
                     break
             vector = GetAbsoluteVector(RelativeVector)
-            print("y-",vector[0][1],"=",vector[1][1]/vector[1][0], "(x-", vector[0][0], ")")
+#            print("y-",vector[0][1],"=",vector[1][1]/vector[1][0], "(x-", vector[0][0], ")")
             vectors.append(vector)
     
     Intersections = []
@@ -235,14 +237,14 @@ while True:
     for intersection in Intersections:
         AvgX+=intersection[0]
         AvgY+=intersection[1]
-    if(Counted > 0):
-        AvgX/=Counted
-        AvgY/=Counted
+#        print("(",intersection[0],",",intersection[1],")")
+    if(Counted > 0 and len(Intersections) > 0):
+        AvgX/=len(Intersections)
+        AvgY/=len(Intersections)
         AvgRot/=Counted
         #print("Maze is at (", AvgX, ",", AvgY, ") with rotation ", AvgRot*180/math.pi, "º")
-    time.sleep(0.1)
-
-
-
-
-
+        print("(", AvgX, ",", AvgY, ")")
+    
+    
+    if cv2.waitKey(1) & 0xFF == ord('q'):    
+        break
