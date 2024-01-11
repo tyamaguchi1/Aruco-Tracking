@@ -111,7 +111,7 @@ plt.show()
 # Video parameters #
 ####################
 if args["camera"].lower() == "true":
-    video = cv2.VideoCapture(1) + cv2.CAP_DSHOW)  #USB camera
+    video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)  #USB camera
     #video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
     video.set(cv2.CAP_PROP_FPS, 50)
     #video.set(cv2.CAP_PROP_GAIN, 14)
@@ -150,7 +150,7 @@ def detect_tilt(corners, ids, matrix_coefficients, distortion_coefficients):
     if ids is not None and len(ids) > 0:
         for i, id in enumerate(ids):
             if id is not None:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                gray = frame#cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 parameters = cv2.aruco.DetectorParameters()
                 corners, ids, rejected = cv2.aruco.detectMarkers(gray, arucoDict, parameters=parameters)
                 rvec, tvec, rejected = cv2.aruco.estimatePoseSingleMarkers(corners, 15.0, matrix_coefficients, distortion_coefficients)
@@ -182,7 +182,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
     global maxX
     maxX = [0 for i in range(PointNum)]
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = frame#cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     parameters = cv2.aruco.DetectorParameters()
     corners, ids, rejected = cv2.aruco.detectMarkers(gray, arucoDict, parameters=parameters)
     #If markers are detected
@@ -228,7 +228,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
 ########
 while True:
     ret, frame = video.read()   #reads video input, outputs frame
-
+    frame = cv2.flip(frame, -1)
     if ret is False:
         break
 

@@ -12,6 +12,8 @@ from matplotlib import pyplot as plt
 import math
 from config import CamArray
 
+###python Output_Packet.py --type DICT_5X5_100
+
 #Constants
 CAM_FOV =48 #In degrees. Either 48 or 37
 MARKER_NUM = 10
@@ -32,9 +34,12 @@ arucoDict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT[args["type"]])
 arucoParams = cv2.aruco.DetectorParameters()
 
 for camera in CamArray:
+    print(camera[1])
     video = cv2.VideoCapture(camera[1] + cv2.CAP_DSHOW)  #USB camera
     #video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
     video.set(cv2.CAP_PROP_FPS, 50)
+    video.set(cv2.CAP_PROP_FRAME_WIDTH, 7680)
+    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 4320)
     #video.set(cv2.CAP_PROP_GAIN, 14)
     #video.set(cv2.CAP_PROP_EXPOSURE, -5)
     cameras[camera[0]].append(video)
@@ -64,6 +69,7 @@ def GetInformation(camera):
     global frame
     ret, frame = camera[0].read()   #reads video input, outputs frame
     if ret is False:
+        print("Failed to get frame from camera",camera[0])
         return None
     name = "Camera" + str(camera[0])
     cv2.imshow(name, frame)
@@ -224,7 +230,7 @@ while True:
                     AvgRot+= Rot
                     break
             vector = GetAbsoluteVector(RelativeVector)
-#            print("y-",vector[0][1],"=",vector[1][1]/vector[1][0], "(x-", vector[0][0], ")")
+            print("y-",vector[0][1],"=",vector[1][1]/vector[1][0], "(x-", vector[0][0], ")")
             vectors.append(vector)
     
     Intersections = []

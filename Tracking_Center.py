@@ -138,7 +138,7 @@ args = vars(parser.parse_args())
 # Video parameters #
 ####################
 if args["camera"].lower() == "true":
-    video = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  #USB camera
+    video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)  #USB camera
     #video = cv2.VideoCapture(0 + cv2.CAP_DSHOW)   #webcam
     video.set(cv2.CAP_PROP_FPS, 50)
     #video.set(cv2.CAP_PROP_GAIN, 14)
@@ -217,7 +217,7 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
     global maxX2
     global maxX3
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = frame#cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     parameters = cv2.aruco.DetectorParameters()
     corners, ids, rejected = cv2.aruco.detectMarkers(gray, arucoDict, parameters=parameters)
 
@@ -330,9 +330,11 @@ def pose(frame, arucoDict, matrix_coefficients, distortion_coefficients):
 # Main #
 ########
 while True:
+    print("got here")
     ret, frame = video.read()   #reads video input, outputs frame
 
     if ret is False:
+        print("and here")
         break
 
     corners, ids, rejected = cv2.aruco.detectMarkers(frame, arucoDict, parameters=arucoParams)

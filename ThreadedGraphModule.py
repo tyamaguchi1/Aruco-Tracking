@@ -45,7 +45,7 @@ PermPoint: adds a new point that will be permanently displayed on the graph
 Update: Sets or overrides a specific key-associated plot or point. Used for data that changes over time. Unless the key is updated,
     its graph will be static
     package: ["key", [type, [type-associated data]]]
-    type can be either "point" or "plot" and require [x, y, color/type] or [x, y, size, color] as data respectively
+    type can be either "plot" or "point" and require [x, y, color/type] or [x, y, size, color] as data respectively
     Ex1: ["Update", ["time", ["point", [15, 40, 5, "b"]]]]
     Ex2: ["Update", ["PastFiveSeconds", ["plot", [x, x**2, "y:"]]]]
 
@@ -97,10 +97,18 @@ def CreateAnimatedGraph(queue, lowX, highX, lowY, highY, name = "Graph", xlabel 
                 print("PermPoint",flush=True)
                 data = term[1]
                 permPoints.append(data)
-            #advanced - limits
+            #limits
+            if signifier == "minX":
+                xmin = term[1]
+            if signifier == "maxX":
+                xmax = term[1]
+            if signifier == "minY":
+                ymin = term[1]
+            if signifier == "maxY":
+                ymax = term[1]
             #Changing data - upon receiving a changing value, update only it if it is in ChangingDict, or add it. Every tick, plot everything in ChangingDict
             if signifier == "Update":
-                print("Update",flush=True)
+#                print("Update",flush=True)
                 data = term[1]
                 ChangingDict[data[0]] = data[1]
         if timeout >= 10:
@@ -113,6 +121,9 @@ def CreateAnimatedGraph(queue, lowX, highX, lowY, highY, name = "Graph", xlabel 
                 plt.plot(pack[0], pack[1], marker="o", markersize=pack[2], markerfacecolor=pack[3])
             elif data[0] == "plot":
                 plt.plot(pack[0], pack[1], pack[2])
+            elif data[0] == "point-pack":
+                for point in pack:
+                    plt.plot(point[0], point[1], marker="o", markersize=point[2], markerfacecolor=point[3])
         
         #chores
         for plot in permPlots:
@@ -120,4 +131,5 @@ def CreateAnimatedGraph(queue, lowX, highX, lowY, highY, name = "Graph", xlabel 
         for plot in permPoints:
             plt.plot(plot[0], plot[1], marker="o", markersize=plot[2], markerfacecolor=plot[3])
         plt.axis([xmin, xmax, ymin, ymax])
+       # plt.axis('equal')
         plt.pause(.001)
